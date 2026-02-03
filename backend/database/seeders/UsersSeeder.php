@@ -10,7 +10,6 @@ class UsersSeeder extends Seeder
 {
     public function run(): void
     {
-        // Create Alice
         User::create([
             'name' => 'Balazs',
             'email' => 'kepirobalazs@example.com',
