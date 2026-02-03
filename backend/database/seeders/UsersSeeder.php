@@ -13,7 +13,7 @@ class UsersSeeder extends Seeder
         // Create Alice
         User::create([
             'name' => 'Balazs',
-            'email' => 'alice@example.com',
+            'email' => 'kepirobalazs@example.com',
             'password' => Hash::make('password123'), 
         ]);
     }
