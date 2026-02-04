@@ -1,12 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Event } from "../events";
-
-export async function getEvents(): Promise<Event[]> {
-  const res = await fetch("http://localhost:8000/api/events", {
-    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-  });
-  return res.json();
-}
+import { getEvents } from "../events";
 
 export default function EventList() {
   const [events, setEvents] = useState<Event[]>([]);
