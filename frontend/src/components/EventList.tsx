@@ -7,15 +7,11 @@ interface Props{
   onDelete:()=>void;
 }
 
-export default function EventList({events,onDelete}:Props) {
-  const [events, setEvents] = useState<Event[]>([]);
+export default function EventList({events, onDelete}:Props) {
   const handleDelete = async(id:number)=>{
     await deleteEvent(id)
     onDelete();
   }
-  useEffect(() => {
-    getEvents().then(setEvents).catch(console.error);
-  }, []);
 
 
   return (

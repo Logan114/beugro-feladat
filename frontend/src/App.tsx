@@ -6,6 +6,7 @@ import LoginForm from "./components/LoginForm";
 import "./App.css";
 import EventForm from "./components/EventForm";
 
+
 function App() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loggedIn, setLoggedIn] = useState(false);
