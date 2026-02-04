@@ -1,13 +1,22 @@
 import { useEffect, useState } from "react";
-import type { Event } from "../events";
+import { deleteEvent, type Event } from "../events";
 import { getEvents } from "../events";
 
-export default function EventList() {
-  const [events, setEvents] = useState<Event[]>([]);
+interface Props{
+  events: Event[];
+  onDelete:()=>void;
+}
 
+export default function EventList({events,onDelete}:Props) {
+  const [events, setEvents] = useState<Event[]>([]);
+  const handleDelete = async(id:number)=>{
+    await deleteEvent(id)
+    onDelete();
+  }
   useEffect(() => {
     getEvents().then(setEvents).catch(console.error);
   }, []);
+
 
   return (
     <div>
@@ -16,9 +25,11 @@ export default function EventList() {
         {events.map((event) => (
           <li key={event.id}>
             {event.name}-{event.date}-{event.time}
+            <button type="button" onClick={()=>handleDelete(event.id)}>Delete</button>
+
           </li>
         ))}
-      </ul>
+      </ul> 
     </div>
   );
 }
