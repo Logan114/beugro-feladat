@@ -1,0 +1,1 @@
+https://stackoverflow.com/questions/79639332/how-to-correctly-configure-cors-in-laravel-12-13-with-the-handlecors-middleware
