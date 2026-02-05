@@ -7,11 +7,11 @@ import "./App.css";
 import EventForm from "./components/EventForm";
 import { Link, Route, Routes } from "react-router-dom";
 import Agent from "./components/agent";
-
 function App() {
+
   const [events, setEvents] = useState<Event[]>([]);
   const [loggedIn, setLoggedIn] = useState(false);
-  const [username, setUsername] = useState("");
+
   
   const loadEvents = async()=>{
     const data = await getEvents();
@@ -19,11 +19,13 @@ function App() {
   };
 
   useEffect(()=>{
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadEvents();
   },[]);
 
   useEffect(() => {
     if (!loggedIn) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadEvents();
 
   }, [loggedIn]);

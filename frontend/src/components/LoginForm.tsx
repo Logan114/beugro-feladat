@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { login } from "../auth";
-
+import ForgotPassword from "./ForgotPassword";
 interface Props {
   onLogin: () => void;
 }
@@ -8,12 +8,18 @@ interface Props {
 export default function LoginForm({ onLogin }: Props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showForgot, setShowForgot] =useState(false);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await login(email, password);
     onLogin();
   };
+
+  if(showForgot){
+    return <ForgotPassword />
+  }
 
   return (
     <form onSubmit={handleSubmit}>
@@ -34,6 +40,7 @@ export default function LoginForm({ onLogin }: Props) {
         onChange={(e) => setPassword(e.target.value)}
       />
       <button type="submit">login</button>
+      <button type="submit" onClick={()=>setShowForgot(true)}>Reset Password</button>
     </form>
   );
 }

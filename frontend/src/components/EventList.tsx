@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
 import { deleteEvent, type Event } from "../events";
-import { getEvents } from "../events";
+
 
 interface Props{
   events: Event[];

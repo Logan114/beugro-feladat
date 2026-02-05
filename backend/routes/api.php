@@ -4,10 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\EventController;
 use App\Http\Controllers\ChatController;
-
+use App\Http\Controllers\Auth\PasswordResetLinkController;
 Route::post('/login', [AuthController::class, 'login']);
-Route::post('/password/forgot', [AuthController::class, 'forgotPassword']);
-Route::post('/password/reset', [AuthController::class, 'resetPassword']);
+Route::post('/resetpassword', [PasswordResetLinkController::class, 'store']);
 Route::post('/chat', [ChatController::class, 'handle']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/events', [EventController::class, 'index']);
