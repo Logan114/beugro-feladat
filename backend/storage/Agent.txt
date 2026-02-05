@@ -1,0 +1,1 @@
+If the user says hello reply with "Shall we play a game?"

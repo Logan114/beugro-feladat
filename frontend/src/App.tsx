@@ -5,7 +5,8 @@ import EventList from "./components/EventList";
 import LoginForm from "./components/LoginForm";
 import "./App.css";
 import EventForm from "./components/EventForm";
-
+import { Link, Route, Routes } from "react-router-dom";
+import Agent from "./components/agent";
 
 function App() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -31,9 +32,20 @@ function App() {
 
   return (
     <div>
-      <h1>Your events:</h1>
-      <EventList events={events} onDelete={loadEvents} />
-      <EventForm onEventCreated={loadEvents} />
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <>
+              <h1>Your events:</h1>
+              <EventList events={events} onDelete={loadEvents} />
+              <EventForm onEventCreated={loadEvents} />
+              <Link to="/agent">Support agent aveliable here</Link>
+            </>
+          }
+        />
+        <Route path="/agent" element={<Agent />} />
+      </Routes>
     </div>
   );
 }
