@@ -39,7 +39,7 @@ export default function LoginForm({ onLogin }: Props) {
         id="password"
         onChange={(e) => setPassword(e.target.value)}
       />
-      <button type="submit">login</button>
+      <button type="submit" style={{color:"276CF5"}} >loaagin</button>
       <button type="submit" onClick={()=>setShowForgot(true)}>Reset Password</button>
     </form>
   );

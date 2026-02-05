@@ -1,5 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
 import type { FormEvent } from "react";
+import { Row,  } from "react-bootstrap";
+
 
 export type AgentRole = "user" | "assistant" | "system";
 
@@ -165,16 +167,28 @@ export default function Agent({
       </div>
 
       <form className="agent__composer" onSubmit={submit}>
+        <div class="container">
+         <div class="row"> 
+          <div class="col-6">
+
+
         <textarea
           className="agent__input"
           value={input}
           onChange={(event) => setInput(event.target.value)}
           placeholder="Ask the agent..."    
           rows={3}
-        />
-        <button className="agent__send" type="submit" disabled={isLoading}>
+          />
+          </div>
+          <div class="col"> 
+
+        <button className="agent__send" type="submit" disabled={isLoading} 
+   >
           {isLoading ? "Sending..." : "Send"}
         </button>
+          </div>
+          </div>
+          </div>
       </form>
 
       <footer className="agent__footer">
@@ -183,3 +197,5 @@ export default function Agent({
     </section>
   );
 }
+
+
