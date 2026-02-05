@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Container } from "react-bootstrap";
 import { login } from "../auth";
 import ForgotPassword from "./ForgotPassword";
 interface Props {
@@ -22,7 +23,9 @@ export default function LoginForm({ onLogin }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <div className="Container">
+      <h2>Please log in to access your events</h2>
+      <form onSubmit={handleSubmit}>
       <input
         type="email"
         name="email"
@@ -39,8 +42,10 @@ export default function LoginForm({ onLogin }: Props) {
         id="password"
         onChange={(e) => setPassword(e.target.value)}
       />
-      <button type="submit" style={{color:"276CF5"}} >loaagin</button>
-      <button type="submit" onClick={()=>setShowForgot(true)}>Reset Password</button>
-    </form>
+      <button type="submit" >login</button>
+      <br />
+      <button type="submit" style={{backgroundColor :"red"}} onClick={()=>setShowForgot(true)}>Reset Password</button>
+      </form>
+    </div>
   );
 }

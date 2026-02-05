@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Balázs',
             'email' => 'kepirobalazs@example.com',
             'password' => Hash::make('password123'),
+            
         ]);
         $this->callWith(EventSeeder::class, ['user' => $balazs]);
     }

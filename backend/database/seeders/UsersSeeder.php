@@ -14,6 +14,7 @@ class UsersSeeder extends Seeder
             'name' => 'Balazs',
             'email' => 'kepirobalazs204@gmail.com',
             'password' => Hash::make('password123'), 
+            
         ]);
     }
 }
