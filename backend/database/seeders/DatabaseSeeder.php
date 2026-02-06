@@ -19,6 +19,14 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password123'),
             
         ]);
+        $admin = User::factory()->create([
+            'name' => 'Root',
+            'email' => 'root@root.com',
+            'password' => Hash::make('root'),
+            'is_agent'=>(true),
+            
+        ]);
         $this->callWith(EventSeeder::class, ['user' => $balazs]);
+        $this->callWith(EventSeeder::class, ['user' => $admin]);
     }
 }

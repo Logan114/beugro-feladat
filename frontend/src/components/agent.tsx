@@ -1,6 +1,7 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { Row,  } from "react-bootstrap";
+import API from "../api";
 
 
 export type AgentRole = "user" | "assistant" | "system";
@@ -36,15 +37,46 @@ const createId = () =>
     ? crypto.randomUUID()
     : `msg_${Date.now()}_${Math.random().toString(16).slice(2)}`;
 
-const normalizeReply = (data: unknown) => {
-  if (!data || typeof data !== "object") return null;
-  if ("reply" in data && typeof data.reply === "string") return data.reply;
-  if ("message" in data && typeof data.message === "string") return data.message;
-  return null;
+type AgentResponse = {
+  type: "ai" | "handoff" | "error";
+  reply: string | null;
+  chat_id?: string;
+};
+
+type SupportChat = {
+  id: string;
+  user_message: string;
+  created_at: string;
+  agent_replies?: { message: string; agent_name?: string; created_at: string }[];
+  user_messages?: { message: string; user_name?: string; created_at: string }[];
+};
+
+const normalizeReply = (data: unknown): AgentResponse => {
+  if (!data || typeof data !== "object") {
+    return { type: "error", reply: null };
+  }
+  const typed = data as Record<string, unknown>;
+  const reply =
+    typeof typed.reply === "string"
+      ? typed.reply
+      : typeof typed.message === "string"
+      ? typed.message
+      : null;
+
+  const type =
+    typed.type === "handoff" || typed.type === "error" || typed.type === "ai"
+      ? typed.type
+      : "ai";
+
+  return {
+    type,
+    reply,
+    chat_id: typeof typed.chat_id === "string" ? typed.chat_id : undefined,
+  };
 };
 
 export default function Agent({
-  endpoint = "/api/chat",
+  endpoint = "/chat",
   initialMessages = [],
   onMessage,
   onError,
@@ -54,6 +86,59 @@ export default function Agent({
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [handoffChatId, setHandoffChatId] = useState<string | null>(null);
+
+  const mapSupportChatToMessages = useCallback((chat: SupportChat): AgentMessage[] => {
+    const entries: AgentMessage[] = [
+      {
+        id: `${chat.id}_user`,
+        role: "user",
+        content: chat.user_message,
+        createdAt: new Date(chat.created_at).getTime(),
+      },
+      ...(chat.user_messages ?? []).map((message, index) => ({
+        id: `${chat.id}_user_${index}`,
+        role: "user" as const,
+        content: message.message,
+        createdAt: new Date(message.created_at).getTime(),
+      })),
+      ...(chat.agent_replies ?? []).map((reply, index) => ({
+        id: `${chat.id}_reply_${index}`,
+        role: "assistant" as const,
+        content: reply.message,
+        createdAt: new Date(reply.created_at).getTime(),
+      })),
+    ];
+
+    return entries.sort((a, b) => a.createdAt - b.createdAt);
+  }, []);
+
+  const loadSupportChat = useCallback(
+    async (chatId: string) => {
+      try {
+        const res = await API.get(`/support/chats/${chatId}`);
+        const chat = res.data?.chat as SupportChat | undefined;
+        if (chat) {
+          setMessages(mapSupportChatToMessages(chat));
+        }
+      } catch (err) {
+        const errorInstance = err instanceof Error ? err : new Error("Unknown error");
+        setError(errorInstance.message);
+        onError?.(errorInstance);
+      }
+    },
+    [mapSupportChatToMessages, onError]
+  );
+
+  useEffect(() => {
+    if (!handoffChatId) return;
+    loadSupportChat(handoffChatId);
+    const interval = window.setInterval(() => {
+      loadSupportChat(handoffChatId);
+    }, 5000);
+
+    return () => window.clearInterval(interval);
+  }, [handoffChatId, loadSupportChat]);
 
   const sendMessage = useCallback(
     async (content: string) => {
@@ -67,33 +152,42 @@ export default function Agent({
         createdAt: Date.now(),
       };
 
-      const history = [...messages, userMessage];
-      setMessages(history);
+      setMessages((prev) => [...prev, userMessage]);
       setIsLoading(true);
       setError(null);
 
       try {
-        const res = await fetch(endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: trimmed, history }),
-        });
-
-        if (!res.ok) {
-          throw new Error(`Request failed with status ${res.status}`);
+        if (handoffChatId) {
+          const res = await API.post(`/support/chats/${handoffChatId}/message`, {
+            message: trimmed,
+          });
+          const chat = res.data?.chat as SupportChat | undefined;
+          if (chat) {
+            setMessages(mapSupportChatToMessages(chat));
+          }
+          return userMessage;
         }
 
-        const data = (await res.json()) as unknown;
-        const reply = normalizeReply(data);
+        const history = [...messages, userMessage];
+        const res = await API.post(endpoint, { message: trimmed, history });
+        const data = res.data as unknown;
+        const response = normalizeReply(data);
 
-        if (!reply) {
+        if (!response?.reply) {
           throw new Error("Unexpected response format from agent endpoint.");
+        }
+
+        if (response.type === "handoff") {
+          if (response.chat_id) {
+            setHandoffChatId(response.chat_id);
+          }
+          return userMessage;
         }
 
         const agentMessage: AgentMessage = {
           id: createId(),
           role: "assistant",
-          content: reply,
+          content: response.reply,
           createdAt: Date.now(),
         };
 
@@ -110,7 +204,7 @@ export default function Agent({
         setIsLoading(false);
       }
     },
-    [endpoint, messages, onError, onMessage]
+    [endpoint, handoffChatId, mapSupportChatToMessages, messages, onError, onMessage]
   );
 
   const submit = useCallback(
@@ -197,5 +291,3 @@ export default function Agent({
     </section>
   );
 }
-
-

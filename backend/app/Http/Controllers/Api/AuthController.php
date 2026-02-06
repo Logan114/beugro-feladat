@@ -25,7 +25,12 @@ class AuthController extends Controller
             ]);
         }
 
-        return ['token' => $user->createToken('api-token')->plainTextToken];
+        return [
+            'token' => $user->createToken('api-token')->plainTextToken,
+            'is_agent' => (bool) $user->is_agent,
+            'name' => $user->name,
+            'email' => $user->email,
+        ];
     }
 
     public function logout(Request $request)

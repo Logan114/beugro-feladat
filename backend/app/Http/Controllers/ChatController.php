@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use App\Services\SupportChatStore;
 
 class ChatController extends Controller
 {
@@ -13,9 +14,24 @@ class ChatController extends Controller
     {
         $message = $request->input('message');
 
-        if (str_contains(strtolower($message), 'human')) {
+        $lowerMessage = strtolower($message ?? '');
+        if (str_contains($lowerMessage, 'human') || str_contains($lowerMessage, 'ember')) {
+            $store = new SupportChatStore();
+            $chatId = uniqid('chat_', true);
+            $user = $request->user();
+            $store->append([
+                'id' => $chatId,
+                'user_id' => $user?->id,
+                'user_message' => $message,
+                'user_messages' => [],
+                'created_at' => now()->toIso8601String(),
+                'status' => 'pending',
+                'agent_replies' => [],
+            ]);
+
             return response()->json([
                 'type' => 'handoff',
+                'chat_id' => $chatId,
                 'reply' => 'An agent will be with you shortly'
             ]);
         }

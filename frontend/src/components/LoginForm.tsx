@@ -3,7 +3,7 @@ import { Container } from "react-bootstrap";
 import { login } from "../auth";
 import ForgotPassword from "./ForgotPassword";
 interface Props {
-  onLogin: () => void;
+  onLogin: (data: { isAgent: boolean }) => void;
 }
 
 export default function LoginForm({ onLogin }: Props) {
@@ -14,8 +14,8 @@ export default function LoginForm({ onLogin }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await login(email, password);
-    onLogin();
+    const data = await login(email, password);
+    onLogin({ isAgent: Boolean(data?.is_agent) });
   };
 
   if(showForgot){
